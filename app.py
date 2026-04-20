@@ -151,3 +151,23 @@ def edit_habit(habit_id):
     conn.close()
 
     return jsonify({"message": "Habit updated!"})
+
+# this route deletes a habit and all its logs
+@app.route("/api/habits/<int:habit_id>", methods=["DELETE"])
+def delete_habit(habit_id):
+
+    from flask import jsonify
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    # delete the habit
+    cursor.execute("DELETE FROM habits WHERE id = ?", (habit_id,))
+
+    # also delete all logs for this habit
+    # otherwise old logs stay in database with no habit attached
+    cursor.execute("DELETE FROM logs WHERE habit_id = ?", (habit_id,))
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({"message": "Habit deleted!"})
