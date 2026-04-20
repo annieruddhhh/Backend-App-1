@@ -50,3 +50,30 @@ def home():
 # start flask
 if __name__ == "__main__":
     app.run(debug=True)
+
+    # this route sends all habits from database to the frontend
+@app.route("/api/habits", methods=["GET"])
+def get_habits():
+
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    # get everything from habits table
+    cursor.execute("SELECT * FROM habits")
+
+    # fetchall gives us all the rows
+    all_habits = cursor.fetchall()
+
+    conn.close()
+
+    # we cant send sqlite rows directly to frontend
+    # so we convert each row into a dictionary first
+    habits_list = []
+    for row in all_habits:
+        habits_list.append(dict(row))
+
+    # jsonify converts the list to json format
+    # json is how frontend and backend talk to each other
+    from flask import jsonify
+    return jsonify(habits_list)
+
