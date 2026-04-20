@@ -118,3 +118,36 @@ def add_habit():
     conn.close()
 
     return jsonify({"message": "Habit added!", "id": new_id}), 201
+
+# this route updates an existing habit
+# habit_id comes from the url like /api/habits/1
+@app.route("/api/habits/<int:habit_id>", methods=["PUT"])
+def edit_habit(habit_id):
+
+    from flask import request, jsonify
+    data = request.get_json()
+
+    # same validation as before
+    if not data.get("name") or data["name"].strip() == "":
+        return jsonify({"error": "Please enter a habit name"}), 400
+
+    if not data.get("category") or data["category"].strip() == "":
+        return jsonify({"error": "Please enter a category"}), 400
+
+    if not data.get("frequency") or data["frequency"].strip() == "":
+        return jsonify({"error": "Please enter a frequency"}), 400
+
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    # update the habit where id matches
+    cursor.execute("""
+        UPDATE habits
+        SET name = ?, category = ?, frequency = ?
+        WHERE id = ?
+    """, (data["name"], data["category"], data["frequency"], habit_id))
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({"message": "Habit updated!"})
