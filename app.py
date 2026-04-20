@@ -77,3 +77,44 @@ def get_habits():
     from flask import jsonify
     return jsonify(habits_list)
 
+# this route receives data from frontend and saves a new habit
+@app.route("/api/habits", methods=["POST"])
+def add_habit():
+
+    # request.get_json() reads the data sent from frontend
+    from flask import request, jsonify
+    data = request.get_json()
+
+    # basic validation - check if fields are empty
+    if not data.get("name") or data["name"].strip() == "":
+        return jsonify({"error": "Please enter a habit name"}), 400
+
+    if not data.get("category") or data["category"].strip() == "":
+        return jsonify({"error": "Please enter a category"}), 400
+
+    if not data.get("frequency") or data["frequency"].strip() == "":
+        return jsonify({"error": "Please enter a frequency"}), 400
+
+    # get todays date
+    from datetime import date
+    today = str(date.today())
+
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    # insert the new habit into database
+    # we use ? instead of putting values directly
+    # this prevents sql injection attacks
+    cursor.execute("""
+        INSERT INTO habits (name, category, frequency, created_at)
+        VALUES (?, ?, ?, ?)
+    """, (data["name"], data["category"], data["frequency"], today))
+
+    conn.commit()
+
+    # lastrowid gives us the id of the habit we just created
+    new_id = cursor.lastrowid
+
+    conn.close()
+
+    return jsonify({"message": "Habit added!", "id": new_id}), 201
