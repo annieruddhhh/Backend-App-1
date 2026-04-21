@@ -42,14 +42,6 @@ def create_tables(): # habits table to store habit
 
 create_tables()
 
-# test to check flask 
-@app.route("/")
-def home():
-    return "Habit Tracker is running!"
-
-# start flask
-if __name__ == "__main__":
-    app.run(debug=True)
 
     # this route sends all habits from database to the frontend
 @app.route("/api/habits", methods=["GET"])
@@ -171,3 +163,12 @@ def delete_habit(habit_id):
     conn.close()
 
     return jsonify({"message": "Habit deleted!"})
+
+# test to check flask 
+@app.route("/")
+def home():
+    return "Habit Tracker is running!"
+
+# start flask
+if __name__ == "__main__":
+    app.run(debug=True)
